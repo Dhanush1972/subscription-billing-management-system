@@ -1,0 +1,61 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: subscription_billing_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Root@12345}
+      MYSQL_DATABASE: SubscriptionBillingDb
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-Root@12345}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  backend:
+    build:
+      context: .
+      dockerfile: src/SubscriptionBilling.API/Dockerfile
+    container_name: subscription_billing_backend
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=SubscriptionBillingDb;User=root;Password=${MYSQL_ROOT_PASSWORD:-Root@12345};
+      - Jwt__Key=${JWT_KEY:-YourSuperSecretJwtKeyForDevTestingOnly12345!}
+      - Jwt__Issuer=SubscriptionBillingSystem
+      - Jwt__Audience=SubscriptionBillingClient
+      - Jwt__AccessTokenExpirationMinutes=60
+      - Jwt__RefreshTokenExpirationDays=7
+      - Stripe__SecretKey=${STRIPE_SECRET_KEY:-sk_test_placeholder}
+      - Stripe__PublishableKey=${STRIPE_PUBLISHABLE_KEY:-pk_test_placeholder}
+      - Stripe__WebhookSecret=${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
+      - Smtp__Host=${SMTP_HOST:-smtp.ethereal.email}
+      - Smtp__Port=587
+      - Smtp__EnableSsl=true
+      - Smtp__FromEmail=billing@subbill.local
+      - Smtp__FromName=SubBill Invoicing
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: subscription_billing_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "4200:80"
+
+volumes:
+  mysql_data:
