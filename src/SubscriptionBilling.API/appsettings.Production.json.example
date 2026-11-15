@@ -1,9 +1,9 @@
 {
   "ConnectionStrings": {
-    "DefaultConnection": "server=YOUR_MONSTERASP_MYSQL_HOST;port=3306;database=YOUR_DB_NAME;user=YOUR_DB_USER;password=YOUR_DB_PASSWORD;"
+    "DefaultConnection": "server=localhost;port=3306;database=subscription_billing;user=subscription_app;password=subbill@1234;"
   },
   "JwtSettings": {
-    "SecretKey": "YOUR_STRONG_PRODUCTION_RANDOM_SECRET_KEY_MIN_64_CHARS_LONG_HERE",
+    "SecretKey": "udIhtG6wlIyQSzl/2SEIsYCixdOS0l4mnBpLJGW8hT6Q2raqRtt/Vc50D/vj9ErPS4zmxgq2hne3wANc1DYFbQ==",
     "Issuer": "SubscriptionBillingAPI",
     "Audience": "SubscriptionBillingClient",
     "ExpiryMinutes": 60,
