@@ -29,15 +29,10 @@ jobs:
       - name: Copy Frontend Build to API wwwroot
         shell: pwsh
         run: |
-          Write-Host "Contents of frontend/dist:"
-          Get-ChildItem -Path frontend/dist -Recurse -Depth 3 | Select-Object -ExpandProperty FullName
-
           $index = Get-ChildItem -Path frontend/dist -Recurse -Filter index.html | Select-Object -First 1
           if (-not $index) { throw "index.html not found anywhere under frontend/dist" }
-
           $source = $index.DirectoryName
           Write-Host "Using build output: $source"
-
           $target = "src/SubscriptionBilling.API/wwwroot"
           New-Item -ItemType Directory -Path $target -Force | Out-Null
           Copy-Item -Path "$source/*" -Destination $target -Recurse -Force
@@ -56,6 +51,17 @@ jobs:
       - name: Publish ASP.NET Core API
         run: dotnet publish src/SubscriptionBilling.API/SubscriptionBilling.API.csproj --configuration Release --no-restore --output ./publish
 
+      - name: Take site offline (release file locks)
+        shell: pwsh
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          Set-Content -Path app_offline.htm -Value "<html><body><h2>Updating, back in a minute...</h2></body></html>"
+          curl.exe -sS --fail -T app_offline.htm "ftp://$env:FTP_SERVER/wwwroot/app_offline.htm" --user "${env:FTP_USERNAME}:${env:FTP_PASSWORD}"
+          Start-Sleep -Seconds 15
+
       - name: Deploy via FTP to MonsterASP.NET
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -68,3 +74,13 @@ jobs:
           exclude: |
             **/appsettings.Production.json
             **/logs/**
+
+      - name: Bring site back online
+        if: always()
+        shell: pwsh
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          curl.exe -sS "ftp://$env:FTP_SERVER/" --user "${env:FTP_USERNAME}:${env:FTP_PASSWORD}" -Q "DELE /wwwroot/app_offline.htm"
