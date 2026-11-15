@@ -1,13 +1,15 @@
 using Microsoft.EntityFrameworkCore;
+using SubscriptionBilling.Application.Interfaces;
 using SubscriptionBilling.Domain.Entities;
 using SubscriptionBilling.Domain.Enums;
+using SubscriptionBilling.Infrastructure.Services;
 using System.Text.Json;
 
 namespace SubscriptionBilling.Infrastructure.Data;
 
 public static class DatabaseSeeder
 {
-    public static async Task SeedAsync(SubscriptionBillingDbContext context)
+    public static async Task SeedAsync(SubscriptionBillingDbContext context, IPasswordHasher? passwordHasher = null)
     {
         // 1. Roles
         if (!await context.Roles.AnyAsync())
@@ -18,8 +20,56 @@ public static class DatabaseSeeder
             await context.SaveChangesAsync();
         }
 
-        // 2. Sample Subscription Plans & Normalized Prices / Features
+        // 2. Default Admin User (if none exists)
+        await SeedAdminUserAsync(context, passwordHasher);
+
+        // 3. Sample Subscription Plans & Normalized Prices / Features
         await SeedSubscriptionPlansAsync(context);
+    }
+
+    private static async Task SeedAdminUserAsync(SubscriptionBillingDbContext context, IPasswordHasher? passwordHasher)
+    {
+        var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Admin");
+        if (adminRole == null)
+        {
+            adminRole = new Role { Name = "Admin" };
+            await context.Roles.AddAsync(adminRole);
+            await context.SaveChangesAsync();
+        }
+
+        var hasAdmin = await context.UserRoles.AnyAsync(ur => ur.RoleId == adminRole.Id);
+        if (!hasAdmin)
+        {
+            var hasher = passwordHasher ?? new PasswordHasher();
+            const string adminEmail = "admin@subscriptionbilling.com";
+
+            var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == adminEmail);
+            if (existingUser == null)
+            {
+                existingUser = new User
+                {
+                    Email = adminEmail,
+                    FirstName = "System",
+                    LastName = "Administrator",
+                    PasswordHash = hasher.HashPassword("Admin@123456!"),
+                    IsActive = true,
+                    CreatedAtUtc = DateTime.UtcNow,
+                    StripeCustomerId = $"cus_admin_{Guid.NewGuid():N}"
+                };
+                await context.Users.AddAsync(existingUser);
+                await context.SaveChangesAsync();
+            }
+
+            if (!await context.UserRoles.AnyAsync(ur => ur.UserId == existingUser.Id && ur.RoleId == adminRole.Id))
+            {
+                await context.UserRoles.AddAsync(new UserRole
+                {
+                    UserId = existingUser.Id,
+                    RoleId = adminRole.Id
+                });
+                await context.SaveChangesAsync();
+            }
+        }
     }
 
     private static async Task SeedSubscriptionPlansAsync(SubscriptionBillingDbContext context)

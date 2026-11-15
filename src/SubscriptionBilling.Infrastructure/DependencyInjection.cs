@@ -15,10 +15,20 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? "server=localhost;port=3306;database=subscription_billing_db;user=root;password=root;";
 
-        // Configure MySQL 8.4 LTS
+        // Configure MySQL / MariaDB (MonsterASP uses MariaDB 10.10, MySQL 8.0 compatible)
         services.AddDbContext<SubscriptionBillingDbContext>(options =>
         {
-            var serverVersion = new MySqlServerVersion(new Version(8, 4, 0));
+            ServerVersion serverVersion;
+            try
+            {
+                serverVersion = ServerVersion.AutoDetect(connectionString);
+            }
+            catch
+            {
+                // Fallback to MySQL 8.0.36 LTS compatibility (compatible with MySQL 8.0 and MariaDB 10.x used on MonsterASP)
+                serverVersion = new MySqlServerVersion(new Version(8, 0, 36));
+            }
+
             options.UseMySql(connectionString, serverVersion, mySqlOptions =>
             {
                 mySqlOptions.MigrationsAssembly(typeof(SubscriptionBillingDbContext).Assembly.FullName);

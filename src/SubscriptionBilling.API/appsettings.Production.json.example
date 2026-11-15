@@ -1,6 +1,7 @@
 {
   "ConnectionStrings": {
-    "DefaultConnection": "server=localhost;port=3306;database=subscription_billing;user=subscription_app;password=subbill@1234;"
+    "// NOTE_MONSTERASP_LOCAL": "Use the 'Local access' connection string from MonsterASP Control Panel (Databases -> [Your DB] -> Users -> Connection string). Do NOT use localhost.",
+    "DefaultConnection": "Server=db80057.databaseasp.net;Port=3306;Database=db80057;Uid=db80057;Pwd=G+q4#a3AP=n6;SslMode=None;"
   },
   "JwtSettings": {
     "SecretKey": "udIhtG6wlIyQSzl/2SEIsYCixdOS0l4mnBpLJGW8hT6Q2raqRtt/Vc50D/vj9ErPS4zmxgq2hne3wANc1DYFbQ==",
@@ -14,7 +15,8 @@
     "SecretKey": "sk_live_your_stripe_secret_key",
     "WebhookSecret": "whsec_your_stripe_webhook_secret"
   },
-  "ApplyMigrationsOnStartup": false,
+  "// NOTE_MIGRATIONS": "Set ApplyMigrationsOnStartup to true so the app automatically creates tables and seeds roles, initial admin, and plans on first startup.",
+  "ApplyMigrationsOnStartup": true,
   "Serilog": {
     "MinimumLevel": {
       "Default": "Information",
