@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
+  <defs>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F8C42B" />
+      <stop offset="100%" stop-color="#E9A801" />
+    </linearGradient>
+  </defs>
+  <!-- Dark rounded square container matching #14161F theme -->
+  <rect width="150" height="150" rx="33" fill="#14161F" />
+  <!-- Gold thunderbolt -->
+  <polygon points="94,19 81,62 114,62 56,131 69,82 36,82" fill="url(#goldGradient)" />
+</svg>

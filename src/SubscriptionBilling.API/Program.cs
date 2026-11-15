@@ -136,6 +136,8 @@ app.UseCors("AngularDevPolicy");
 
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
+app.UseStaticFiles();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SubBill</title>
+    <link rel="icon" type="image/svg+xml" href="~/favicon.svg" asp-append-version="true" />
+    <link rel="alternate icon" href="~/favicon.ico" asp-append-version="true" />
+    <link rel="apple-touch-icon" sizes="180x180" href="~/apple-touch-icon.png" asp-append-version="true" />
+    <meta name="theme-color" content="#14161F" />
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a class="brand" href="/" style="display: inline-flex; align-items: center; gap: 8px;">
+                <img src="~/images/logo.svg" alt="SubBill Logo" style="height: 32px; width: auto; vertical-align: middle;" asp-append-version="true" />
+                <span class="brand-name">SubBill</span>
+            </a>
+        </nav>
+    </header>
+    <main role="main">
+        @RenderBody()
+    </main>
+</body>
+</html>

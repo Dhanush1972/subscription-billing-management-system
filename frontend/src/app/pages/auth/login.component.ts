@@ -13,6 +13,9 @@ import { NotificationService } from '../../core/services/notification.service';
     <div class="auth-page">
       <div class="auth-card card">
         <div class="auth-header">
+          <a routerLink="/" class="auth-logo-link" title="SubBill Home">
+            <img src="images/logo.svg" alt="SubBill Logo" class="auth-logo" />
+          </a>
           <h2>Welcome Back</h2>
           <p class="text-muted">Sign in to your subscription billing account</p>
         </div>
@@ -72,6 +75,8 @@ import { NotificationService } from '../../core/services/notification.service';
     .auth-header {
       text-align: center;
       margin-bottom: 1.5rem;
+      .auth-logo-link { display: inline-block; margin-bottom: 0.75rem; text-decoration: none; }
+      .auth-logo { height: 64px; width: auto; margin: 0 auto; display: block; }
       h2 { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 0.25rem; }
       .text-muted { color: #64748b; font-size: 0.875rem; }
     }

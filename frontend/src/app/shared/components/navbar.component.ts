@@ -11,7 +11,7 @@ import { AuthService } from '../../core/services/auth.service';
     <nav class="navbar">
       <div class="nav-container">
         <a routerLink="/" class="brand">
-          <span class="brand-icon">⚡</span>
+          <img src="images/logo.svg" alt="SubBill Logo" class="brand-logo" />
           <span class="brand-name">SubBill</span>
         </a>
 
@@ -82,7 +82,12 @@ import { AuthService } from '../../core/services/auth.service';
       font-size: 1.25rem;
       color: #0f172a;
       text-decoration: none;
-      .brand-icon { font-size: 1.4rem; }
+      .brand-logo {
+        height: 32px;
+        width: auto;
+        vertical-align: middle;
+        display: block;
+      }
     }
     .nav-links {
       display: flex;
