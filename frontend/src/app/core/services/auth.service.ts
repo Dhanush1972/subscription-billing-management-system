@@ -7,7 +7,7 @@ import { AuthResponse, UserProfile } from '../models/models';
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:5219/api/auth';
+  private readonly apiUrl = '/api/auth';
   private readonly tokenKey = 'sub_access_token';
   private readonly userKey = 'sub_user_profile';
 

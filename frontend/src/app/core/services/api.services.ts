@@ -13,7 +13,7 @@ import {
   UserManagement
 } from '../models/models';
 
-const API_BASE = 'http://localhost:5219/api';
+const API_BASE = '/api';
 
 @Injectable({ providedIn: 'root' })
 export class PlanService {

@@ -71,7 +71,10 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireCustomerRole", policy => policy.RequireRole("Customer"));
 });
 
-// 6. Swagger / OpenAPI Configuration with JWT Bearer
+// 6. Health Checks
+builder.Services.AddHealthChecks();
+
+// 7. Swagger / OpenAPI Configuration with JWT Bearer
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -111,9 +114,10 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// 7. Auto-Migration & Database Seeder on startup
-using (var scope = app.Services.CreateScope())
+// 8. Auto-Migration & Database Seeder on startup (Development only or if explicitly configured)
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
 {
+    using var scope = app.Services.CreateScope();
     var services = scope.ServiceProvider;
     var logger = services.GetRequiredService<ILogger<Program>>();
     try
@@ -131,27 +135,49 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// 8. Pipeline Configuration
-app.UseCors("AngularDevPolicy");
-
+// 9. Pipeline Configuration
+// Global exception handling at the top
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
-app.UseStaticFiles();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
 
+app.UseHttpsRedirection();
+
+// Development-only tools: Swagger & permissive CORS
 if (app.Environment.IsDevelopment())
 {
+    app.UseCors("AngularDevPolicy");
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Subscription Billing API v1");
-        c.RoutePrefix = string.Empty; // Serve Swagger UI at root "/"
+        c.RoutePrefix = "swagger";
     });
 }
+
+// Serve default file (index.html) and static files from wwwroot
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Health check endpoint
+app.MapHealthChecks("/health");
+
+// API Controllers
 app.MapControllers();
+
+// Unknown /api routes return 404 instead of falling back to index.html
+app.Map("/api/{**slug}", () => Results.NotFound());
+
+// Fallback to Angular SPA index.html for client-side routing
+app.MapFallbackToFile("index.html");
 
 app.Run();
 

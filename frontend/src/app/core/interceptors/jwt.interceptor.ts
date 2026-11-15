@@ -48,7 +48,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
       } else if (error.status === 403) {
         message = 'You do not have permission to perform this action.';
       } else if (error.status === 0) {
-        message = 'Unable to connect to the backend API server. Please verify the ASP.NET Core API is running on http://localhost:5219 (or port 5000).';
+        message = 'Unable to connect to the backend API server. Please verify your network connection and server status.';
       }
 
       notificationService.error(message);

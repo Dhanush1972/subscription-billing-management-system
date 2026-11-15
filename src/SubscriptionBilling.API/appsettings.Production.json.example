@@ -1,0 +1,29 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "server=YOUR_MONSTERASP_MYSQL_HOST;port=3306;database=YOUR_DB_NAME;user=YOUR_DB_USER;password=YOUR_DB_PASSWORD;"
+  },
+  "JwtSettings": {
+    "SecretKey": "YOUR_STRONG_PRODUCTION_RANDOM_SECRET_KEY_MIN_64_CHARS_LONG_HERE",
+    "Issuer": "SubscriptionBillingAPI",
+    "Audience": "SubscriptionBillingClient",
+    "ExpiryMinutes": 60,
+    "RefreshTokenExpiryDays": 7
+  },
+  "Stripe": {
+    "PublishableKey": "pk_live_your_stripe_publishable_key",
+    "SecretKey": "sk_live_your_stripe_secret_key",
+    "WebhookSecret": "whsec_your_stripe_webhook_secret"
+  },
+  "ApplyMigrationsOnStartup": false,
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "Microsoft.Hosting.Lifetime": "Information",
+        "Microsoft.EntityFrameworkCore": "Warning"
+      }
+    }
+  },
+  "AllowedHosts": "*"
+}
