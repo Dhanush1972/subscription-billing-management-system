@@ -26,7 +26,7 @@ jobs:
           npm ci
           npm run build -- --configuration production
 
-           - name: Copy Frontend Build to API wwwroot
+      - name: Copy Frontend Build to API wwwroot
         shell: pwsh
         run: |
           Write-Host "Contents of frontend/dist:"
@@ -50,7 +50,7 @@ jobs:
       - name: Restore Dependencies
         run: dotnet restore SubscriptionBilling.slnx
 
-      - name: Run Tests
+      - name: Run Unit & Integration Tests
         run: dotnet test tests/SubscriptionBilling.Tests/SubscriptionBilling.Tests.csproj --configuration Release --no-restore --verbosity normal
 
       - name: Publish ASP.NET Core API
