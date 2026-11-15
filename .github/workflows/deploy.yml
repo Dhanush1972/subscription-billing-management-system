@@ -16,11 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          dotnet-version: '8.0.x'
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+          node-version: 24
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -35,7 +31,7 @@ jobs:
         run: |
           $target = "src/SubscriptionBilling.API/wwwroot"
           if (!(Test-Path $target)) { New-Item -ItemType Directory -Path $target -Force }
-          Copy-Item -Path "frontend/dist/frontend/*" -Destination $target -Recurse -Force
+          Copy-Item -Path "frontend/dist/frontend/browser/*" -Destination $target -Recurse -Force
           if (!(Test-Path "$target/index.html")) {
             throw "Error: index.html not found in $target. Frontend build failed or output path mismatch."
           }
@@ -44,22 +40,16 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '9.0.x'
 
       - name: Restore Dependencies
         run: dotnet restore SubscriptionBilling.slnx
 
-      - name: Run Unit & Integration Tests
+      - name: Run Tests
         run: dotnet test tests/SubscriptionBilling.Tests/SubscriptionBilling.Tests.csproj --configuration Release --no-restore --verbosity normal
 
       - name: Publish ASP.NET Core API
-        shell: pwsh
-        run: |
-          dotnet publish src/SubscriptionBilling.API/SubscriptionBilling.API.csproj --configuration Release --no-restore --output ./publish
-          # Create logs directory for IIS stdout logging if not already present
-          if (!(Test-Path "./publish/logs")) {
-            New-Item -ItemType Directory -Path "./publish/logs" -Force
-          }
+        run: dotnet publish src/SubscriptionBilling.API/SubscriptionBilling.API.csproj --configuration Release --no-restore --output ./publish
 
       - name: Deploy via FTP to MonsterASP.NET
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -71,5 +61,5 @@ jobs:
           local-dir: ./publish/
           protocol: ftp
           exclude: |
-            **appsettings.Production.json
-            **logs/**
+            **/appsettings.Production.json
+            **/logs/**
