@@ -1,0 +1,46 @@
+name: Deploy to MonsterASP
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Copy frontend into API wwwroot
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force src/SubscriptionBilling.API/wwwroot | Out-Null
+          Copy-Item -Recurse -Force frontend/dist/* src/SubscriptionBilling.API/wwwroot/
+
+      - name: Run tests
+        run: dotnet test tests/SubscriptionBilling.Tests -c Release
+
+      - name: Publish API
+        run: dotnet publish src/SubscriptionBilling.API -c Release -o publish
+
+      - name: Deploy
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
